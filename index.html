@@ -179,6 +179,42 @@
             color: #e0e0e0;
         }
 
+        /* Estilo para os passos com imagens */
+        .step-image {
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .step-image img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            background: #1a1a1a;
+            border-radius: 6px;
+            padding: 2px;
+            border: 1px solid #3a3a3a;
+        }
+
+        .step-line {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 2px 0;
+        }
+
+        .step-number {
+            color: #888;
+            min-width: 30px;
+            font-size: 0.85rem;
+        }
+
+        .step-name {
+            color: #ccc;
+            font-size: 0.9rem;
+        }
+
         .save-area {
             display: flex;
             flex-wrap: wrap;
@@ -267,6 +303,10 @@
                 flex-direction: column;
                 align-items: stretch;
             }
+            .step-image img {
+                width: 28px;
+                height: 28px;
+            }
         }
     </style>
 </head>
@@ -290,7 +330,7 @@
     <div class="card">
         <h2 style="display:flex; align-items:center; gap:8px;">📋 Resultado</h2>
         <div id="resultContainer">
-            <pre id="output">Nenhum cálculo.</pre>
+            <div id="output">Nenhum cálculo.</div>
         </div>
 
         <!-- Área de salvar craft -->
@@ -316,6 +356,18 @@
             { name: "Upset", value: 13 },
             { name: "Shrink", value: 16 },
         ];
+
+        // Mapeamento dos nomes das ações para os nomes dos arquivos de imagem
+        const imageMap = {
+            "Light Hit": "hit_light",
+            "Medium Hit": "hit_medium",
+            "Hard Hit": "hit_hard",
+            "Draw": "draw",
+            "Punch": "punch",
+            "Bend": "bend",
+            "Upset": "upset",
+            "Shrink": "shrink"
+        };
 
         const hitActions = ["Light Hit", "Medium Hit", "Hard Hit"];
         const modes = ["Any", "Last", "Not Last"];
@@ -382,6 +434,26 @@
         }
 
         // ------------------------------------------------------------
+        //  FUNÇÃO PARA GERAR HTML DO PASSO COM IMAGEM
+        // ------------------------------------------------------------
+        function renderStep(stepNumber, actionName) {
+            const imageName = imageMap[actionName] || actionName.toLowerCase().replace(/ /g, '_');
+            // Tenta carregar a imagem, se não existir, mostra o texto
+            return `
+                <div class="step-line">
+                    <span class="step-number">${String(stepNumber).padStart(2, ' ')}.</span>
+                    <span class="step-image">
+                        <img src="${imageName}.png" 
+                             alt="${actionName}" 
+                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                        <span style="display:none;">${actionName}</span>
+                    </span>
+                    <span class="step-name">${actionName}</span>
+                </div>
+            `;
+        }
+
+        // ------------------------------------------------------------
         //  CÁLCULO PRINCIPAL (BFS por profundidade, retorna apenas 1 solução mais curta)
         // ------------------------------------------------------------
         function calculate() {
@@ -401,10 +473,6 @@
                         if (node.path.length < minSteps) {
                             minSteps = node.path.length;
                             bestSolution = node;
-                            // Não interrompemos, mas continuamos para ver se existe outro com mesmo length (mas só precisamos de 1)
-                            // Entretanto, como queremos APENAS 1, podemos quebrar se encontrarmos o primeiro com length mínimo.
-                            // Mas como BFS por profundidade, a primeira encontrada é a mais curta para aquela profundidade.
-                            // Vamos coletar e depois sair.
                         }
                     }
                     if (node.path.length >= maxDepth) continue;
@@ -421,34 +489,42 @@
                 }
 
                 if (bestSolution) {
-                    // Encontramos a melhor solução (primeira com menor profundidade)
                     break;
                 }
             }
 
             const output = document.getElementById("output");
             if (!bestSolution) {
-                output.textContent = "❌ Nenhuma solução encontrada.";
+                output.innerHTML = '<div style="color:#f0a0a0; padding:10px;">❌ Nenhuma solução encontrada.</div>';
                 return;
             }
 
-            // Exibe apenas a melhor solução (mais curta)
+            // Exibe apenas a melhor solução (mais curta) com imagens
             const sol = bestSolution;
-            let txt = `✅ Solução encontrada com ${sol.path.length} passos\n`;
-            txt += `🎯 Valor final: ${sol.value}\n\n`;
+            let html = `
+                <div style="margin-bottom:12px; color:#b0d0b0;">
+                    ✅ Solução encontrada com <strong>${sol.path.length}</strong> passos
+                    <span style="margin-left:16px; color:#aaa;">🎯 Valor final: ${sol.value}</span>
+                </div>
+            `;
 
             const lightHits = sol.path.filter(p => p === "Light Hit").length;
             const mediumHits = sol.path.filter(p => p === "Medium Hit").length;
             const hardHits = sol.path.filter(p => p === "Hard Hit").length;
             if (lightHits + mediumHits + hardHits > 0) {
-                txt += `⚡ Hits: Light=${lightHits}, Medium=${mediumHits}, Hard=${hardHits}\n\n`;
+                html += `<div style="margin-bottom:12px; color:#aaa;">
+                    ⚡ Hits: Light=${lightHits}, Medium=${mediumHits}, Hard=${hardHits}
+                </div>`;
             }
 
+            // Lista os passos com imagens
+            html += `<div style="background:#1a1a1a; padding:12px 16px; border-radius:10px; border:1px solid #333;">`;
             sol.path.forEach((p, i) => {
-                txt += (i + 1).toString().padStart(2, ' ') + ". " + p + "\n";
+                html += renderStep(i + 1, p);
             });
+            html += `</div>`;
 
-            output.textContent = txt;
+            output.innerHTML = html;
             // guarda para salvar
             window._lastSolution = sol;
         }
@@ -482,7 +558,6 @@
                         </span>`;
             }).join('');
 
-            // Adiciona eventos de clique em cada badge (abre menu de ações)
             document.querySelectorAll('.emoji-badge').forEach(el => {
                 el.addEventListener('click', function(e) {
                     const idx = parseInt(this.dataset.index);
@@ -491,7 +566,6 @@
             });
         }
 
-        // Menu de ações (carregar, renomear, excluir)
         function showCraftActions(index, element) {
             const crafts = loadCrafts();
             const craft = crafts[index];
@@ -507,14 +581,10 @@
             if (action === null) return;
 
             if (action === '1') {
-                // Carregar: preenche target e regras?
-                // Vamos carregar target e as restrições (se houver)
                 if (craft.target !== undefined) {
                     document.getElementById('target').value = craft.target;
                 }
-                // Restrições: armazenamos como array de objetos {action, mode}
                 if (craft.rules && Array.isArray(craft.rules)) {
-                    // Limpa e preenche os selects
                     for (let i = 0; i < 3; i++) {
                         const selAction = document.getElementById('action' + i);
                         const selMode = document.getElementById('mode' + i);
@@ -528,14 +598,11 @@
                         }
                     }
                 }
-                // Opcional: carregar também o nome/emoji nos campos de salvar
                 document.getElementById('craftName').value = craft.name || '';
                 document.getElementById('craftEmoji').value = craft.emoji || '⚔️';
-                // recalcula
                 calculate();
                 document.getElementById('saveFeedback').textContent = `✅ Craft "${name}" carregado.`;
             } else if (action === '2') {
-                // Renomear
                 const newName = prompt('Novo nome:', name);
                 if (newName !== null && newName.trim() !== '') {
                     const newEmoji = prompt('Novo emoji (opcional):', emoji);
@@ -546,7 +613,6 @@
                     document.getElementById('saveFeedback').textContent = `✏️ Craft renomeado para "${newName.trim()}"`;
                 }
             } else if (action === '3') {
-                // Excluir
                 if (confirm(`Excluir craft "${name}"?`)) {
                     crafts.splice(index, 1);
                     saveCrafts(crafts);
@@ -558,15 +624,11 @@
             }
         }
 
-        // ------------------------------------------------------------
-        //  SALVAR CRAFT (com nome, emoji, target e regras)
-        // ------------------------------------------------------------
         function saveCraft() {
             const name = document.getElementById('craftName').value.trim() || 'Sem nome';
             const emoji = document.getElementById('craftEmoji').value.trim() || '📦';
             const target = parseInt(document.getElementById('target').value) || 0;
 
-            // Coleta regras atuais
             const rules = [];
             for (let i = 0; i < 3; i++) {
                 const act = document.getElementById('action' + i).value;
@@ -576,7 +638,6 @@
             }
 
             const crafts = loadCrafts();
-            // Verifica se já existe com mesmo nome (opcional: avisar)
             const existing = crafts.findIndex(c => c.name === name);
             if (existing !== -1) {
                 if (!confirm(`Já existe um craft com nome "${name}". Deseja sobrescrever?`)) return;
@@ -594,13 +655,10 @@
         // ------------------------------------------------------------
         renderEmojiStrip();
 
-        // Se houver um craft salvo, carrega o primeiro? Não, apenas exibe.
-        // Ao carregar a página, já calcula com valores padrão.
         window.onload = function() {
             calculate();
         };
 
-        // expõe funções para botões
         window.calculate = calculate;
         window.saveCraft = saveCraft;
     </script>
