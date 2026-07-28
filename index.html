@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TFC Anvil Calculator · Crafts</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        body {
+            background: #1e1e1e;
+            color: #f0f0f0;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+            max-width: 960px;
+            margin: 2rem auto;
+            padding: 0 20px 40px;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 400;
+            letter-spacing: 1px;
+            border-bottom: 1px solid #3a3a3a;
+            padding-bottom: 18px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .emoji-strip {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px 18px;
+            background: #262626;
+            padding: 12px 20px;
+            border-radius: 60px;
+            margin: 10px auto 25px;
+            max-width: 700px;
+            border: 1px solid #3a3a3a;
+        }
+
+        .emoji-badge {
+            font-size: 2rem;
+            line-height: 1;
+            cursor: pointer;
+            transition: 0.15s;
+            border-radius: 40px;
+            padding: 4px 12px;
+            background: #1f1f1f;
+            border: 1px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .emoji-badge:hover {
+            background: #333;
+            border-color: #5a5a5a;
+            transform: scale(1.02);
+        }
+
+        .emoji-badge .tooltip {
+            font-size: 0.7rem;
+            background: #111;
+            padding: 2px 10px;
+            border-radius: 30px;
+            color: #bbb;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-weight: 300;
+        }
+
+        .card {
+            background: #2b2b2b;
+            padding: 20px 24px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            border: 1px solid #3d3d3d;
+        }
+
+        label {
+            display: block;
+            margin-top: 16px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            color: #ccc;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            margin-top: 6px;
+            background: #3a3a3a;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #7c9c7c;
+            background: #2f2f2f;
+        }
+
+        .rule-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .rule-row select {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            margin-top: 26px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            background: #4a7a4a;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: 0.15s;
+            letter-spacing: 0.3px;
+        }
+
+        button:hover {
+            background: #5e9e5e;
+            transform: scale(1.01);
+            box-shadow: 0 4px 12px #2f5a2f;
+        }
+
+        .result-panel {
+            background: #1f1f1f;
+            border-radius: 14px;
+            padding: 16px 20px;
+            margin-top: 16px;
+            border-left: 6px solid #5a8f5a;
+        }
+
+        .result-panel h3 {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            color: #c6e0c6;
+        }
+
+        pre {
+            white-space: pre-wrap;
+            background: #141414;
+            padding: 18px;
+            border-radius: 12px;
+            overflow: auto;
+            max-height: 480px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            border: 1px solid #333;
+            color: #e0e0e0;
+        }
+
+        .save-area {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0 8px;
+            background: #252525;
+            padding: 12px 16px;
+            border-radius: 40px;
+        }
+
+        .save-area input {
+            flex: 2;
+            min-width: 140px;
+            background: #333;
+            padding: 10px 14px;
+            margin: 0;
+        }
+
+        .save-area button {
+            flex: 0 1 auto;
+            width: auto;
+            padding: 10px 22px;
+            margin: 0;
+            background: #3d6b8f;
+            font-size: 1rem;
+        }
+
+        .save-area button:hover {
+            background: #5086b0;
+        }
+
+        .craft-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .craft-actions button {
+            width: auto;
+            padding: 4px 16px;
+            margin: 2px;
+            font-size: 0.85rem;
+            background: #3d3d3d;
+            border-radius: 30px;
+            font-weight: 400;
+        }
+
+        .craft-actions button:hover {
+            background: #555;
+        }
+
+        .craft-actions .del {
+            background: #6b3d3d;
+        }
+
+        .craft-actions .del:hover {
+            background: #8f4a4a;
+        }
+
+        .inline-flex {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge-emoji {
+            font-size: 1.8rem;
+            line-height: 1;
+        }
+
+        .text-muted {
+            color: #999;
+            font-size: 0.8rem;
+        }
+
+        @media (max-width: 600px) {
+            .rule-row {
+                flex-direction: column;
+            }
+            .save-area {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>⚒️ TFC Anvil · Calculator</h1>
+
+    <!-- Emojis dos crafts salvos -->
+    <div id="emojiStrip" class="emoji-strip"></div>
+
+    <div class="card">
+        <label>🎯 Valor Final</label>
+        <input id="target" type="number" value="112">
+
+        <h3 style="margin-top:24px;">⛓️ Restrições (últimos 3 passos)</h3>
+        <div id="rules"></div>
+
+        <button onclick="calculate()">🔨 Calcular</button>
+    </div>
+
+    <div class="card">
+        <h2 style="display:flex; align-items:center; gap:8px;">📋 Resultado</h2>
+        <div id="resultContainer">
+            <pre id="output">Nenhum cálculo.</pre>
+        </div>
+
+        <!-- Área de salvar craft -->
+        <div class="save-area">
+            <input id="craftName" placeholder="Nome do craft (ex: Espada)" value="Meu craft">
+            <input id="craftEmoji" placeholder="Emoji" value="⚔️" style="flex:0.5; min-width:70px;">
+            <button onclick="saveCraft()">💾 Salvar craft</button>
+        </div>
+        <div id="saveFeedback" class="text-muted" style="margin-top:6px;"></div>
+    </div>
+
+    <script>
+        // ------------------------------------------------------------
+        //  AÇÕES E REGRAS (mesmo do original)
+        // ------------------------------------------------------------
+        const actions = [
+            { name: "Light Hit", value: -3 },
+            { name: "Medium Hit", value: -6 },
+            { name: "Hard Hit", value: -9 },
+            { name: "Draw", value: -15 },
+            { name: "Punch", value: 2 },
+            { name: "Bend", value: 7 },
+            { name: "Upset", value: 13 },
+            { name: "Shrink", value: 16 },
+        ];
+
+        const hitActions = ["Light Hit", "Medium Hit", "Hard Hit"];
+        const modes = ["Any", "Last", "Not Last"];
+        const names = actions.map(a => a.name);
+        const allActions = ["Any Hit", ...names];
+
+        // ------------------------------------------------------------
+        //  INJECT RULES UI
+        // ------------------------------------------------------------
+        const rulesDiv = document.getElementById("rules");
+        for (let i = 0; i < 3; i++) {
+            let html = `
+                <div class="rule-row">
+                    <select id="action${i}">
+                        <option value="">Nenhum</option>
+                        ${allActions.map(n => `<option>${n}</option>`).join("")}
+                    </select>
+                    <select id="mode${i}">
+                        ${modes.map(m => `<option>${m}</option>`).join("")}
+                    </select>
+                </div>
+            `;
+            rulesDiv.innerHTML += html;
+        }
+
+        // ------------------------------------------------------------
+        //  LÓGICA DE VALIDAÇÃO (obey)
+        // ------------------------------------------------------------
+        function obey(path) {
+            const rules = [];
+            for (let i = 0; i < 3; i++) {
+                const act = document.getElementById("action" + i).value;
+                if (act === "") continue;
+                rules.push({
+                    action: act,
+                    mode: document.getElementById("mode" + i).value
+                });
+            }
+            if (rules.length === 0) return true;
+
+            const hasAnyHitRule = rules.some(r => r.action === "Any Hit");
+            if (hasAnyHitRule) {
+                const lastThree = path.slice(-3);
+                const hasAnyHit = lastThree.some(action => hitActions.includes(action));
+                if (!hasAnyHit) return false;
+            }
+
+            const lastThree = path.slice(-3);
+            for (const r of rules) {
+                if (r.action === "Any Hit") continue;
+                if (hitActions.includes(r.action)) {
+                    const idx = lastThree.indexOf(r.action);
+                    if (idx === -1) return false;
+                    if (r.mode === "Last" && lastThree[lastThree.length - 1] !== r.action) return false;
+                    if (r.mode === "Not Last" && lastThree[lastThree.length - 1] === r.action) return false;
+                    continue;
+                }
+                const idx = lastThree.indexOf(r.action);
+                if (idx === -1) return false;
+                if (r.mode === "Last" && lastThree[lastThree.length - 1] !== r.action) return false;
+                if (r.mode === "Not Last" && lastThree[lastThree.length - 1] === r.action) return false;
+            }
+            return true;
+        }
+
+        // ------------------------------------------------------------
+        //  CÁLCULO PRINCIPAL (BFS por profundidade, retorna apenas 1 solução mais curta)
+        // ------------------------------------------------------------
+        function calculate() {
+            const target = parseInt(document.getElementById("target").value);
+            const start = 0;
+            let bestSolution = null;
+            let minSteps = Infinity;
+
+            for (let maxDepth = 1; maxDepth <= 40; maxDepth++) {
+                const queue = [{ value: start, path: [] }];
+                const visited = new Set();
+                visited.add(start + "|");
+
+                while (queue.length) {
+                    const node = queue.shift();
+                    if (node.value === target && obey(node.path)) {
+                        if (node.path.length < minSteps) {
+                            minSteps = node.path.length;
+                            bestSolution = node;
+                            // Não interrompemos, mas continuamos para ver se existe outro com mesmo length (mas só precisamos de 1)
+                            // Entretanto, como queremos APENAS 1, podemos quebrar se encontrarmos o primeiro com length mínimo.
+                            // Mas como BFS por profundidade, a primeira encontrada é a mais curta para aquela profundidade.
+                            // Vamos coletar e depois sair.
+                        }
+                    }
+                    if (node.path.length >= maxDepth) continue;
+
+                    for (const a of actions) {
+                        const nextValue = node.value + a.value;
+                        if (nextValue < -100 || nextValue > 250) continue;
+                        const nextPath = [...node.path, a.name];
+                        const key = nextValue + "|" + nextPath.slice(-3).join(",");
+                        if (visited.has(key)) continue;
+                        visited.add(key);
+                        queue.push({ value: nextValue, path: nextPath });
+                    }
+                }
+
+                if (bestSolution) {
+                    // Encontramos a melhor solução (primeira com menor profundidade)
+                    break;
+                }
+            }
+
+            const output = document.getElementById("output");
+            if (!bestSolution) {
+                output.textContent = "❌ Nenhuma solução encontrada.";
+                return;
+            }
+
+            // Exibe apenas a melhor solução (mais curta)
+            const sol = bestSolution;
+            let txt = `✅ Solução encontrada com ${sol.path.length} passos\n`;
+            txt += `🎯 Valor final: ${sol.value}\n\n`;
+
+            const lightHits = sol.path.filter(p => p === "Light Hit").length;
+            const mediumHits = sol.path.filter(p => p === "Medium Hit").length;
+            const hardHits = sol.path.filter(p => p === "Hard Hit").length;
+            if (lightHits + mediumHits + hardHits > 0) {
+                txt += `⚡ Hits: Light=${lightHits}, Medium=${mediumHits}, Hard=${hardHits}\n\n`;
+            }
+
+            sol.path.forEach((p, i) => {
+                txt += (i + 1).toString().padStart(2, ' ') + ". " + p + "\n";
+            });
+
+            output.textContent = txt;
+            // guarda para salvar
+            window._lastSolution = sol;
+        }
+
+        // ------------------------------------------------------------
+        //  GERENCIAMENTO DE CRAFTS (localStorage)
+        // ------------------------------------------------------------
+        function loadCrafts() {
+            try {
+                return JSON.parse(localStorage.getItem('tfc_crafts')) || [];
+            } catch { return []; }
+        }
+
+        function saveCrafts(crafts) {
+            localStorage.setItem('tfc_crafts', JSON.stringify(crafts));
+        }
+
+        function renderEmojiStrip() {
+            const strip = document.getElementById('emojiStrip');
+            const crafts = loadCrafts();
+            if (crafts.length === 0) {
+                strip.innerHTML = '<span class="text-muted" style="padding:4px 12px;">Nenhum craft salvo</span>';
+                return;
+            }
+            strip.innerHTML = crafts.map((c, idx) => {
+                const emoji = c.emoji || '📦';
+                const name = c.name || 'sem nome';
+                return `<span class="emoji-badge" data-index="${idx}" title="${name}">
+                            ${emoji}
+                            <span class="tooltip">${name}</span>
+                        </span>`;
+            }).join('');
+
+            // Adiciona eventos de clique em cada badge (abre menu de ações)
+            document.querySelectorAll('.emoji-badge').forEach(el => {
+                el.addEventListener('click', function(e) {
+                    const idx = parseInt(this.dataset.index);
+                    showCraftActions(idx, this);
+                });
+            });
+        }
+
+        // Menu de ações (carregar, renomear, excluir)
+        function showCraftActions(index, element) {
+            const crafts = loadCrafts();
+            const craft = crafts[index];
+            if (!craft) return;
+
+            const name = craft.name || 'sem nome';
+            const emoji = craft.emoji || '📦';
+
+            const action = prompt(
+                `🧰 Craft: ${emoji} ${name}\n\nEscolha uma ação:\n1 - Carregar\n2 - Renomear\n3 - Excluir\n\nDigite o número (1,2,3):`,
+                '1'
+            );
+            if (action === null) return;
+
+            if (action === '1') {
+                // Carregar: preenche target e regras?
+                // Vamos carregar target e as restrições (se houver)
+                if (craft.target !== undefined) {
+                    document.getElementById('target').value = craft.target;
+                }
+                // Restrições: armazenamos como array de objetos {action, mode}
+                if (craft.rules && Array.isArray(craft.rules)) {
+                    // Limpa e preenche os selects
+                    for (let i = 0; i < 3; i++) {
+                        const selAction = document.getElementById('action' + i);
+                        const selMode = document.getElementById('mode' + i);
+                        if (i < craft.rules.length) {
+                            const rule = craft.rules[i];
+                            selAction.value = rule.action || '';
+                            selMode.value = rule.mode || 'Any';
+                        } else {
+                            selAction.value = '';
+                            selMode.value = 'Any';
+                        }
+                    }
+                }
+                // Opcional: carregar também o nome/emoji nos campos de salvar
+                document.getElementById('craftName').value = craft.name || '';
+                document.getElementById('craftEmoji').value = craft.emoji || '⚔️';
+                // recalcula
+                calculate();
+                document.getElementById('saveFeedback').textContent = `✅ Craft "${name}" carregado.`;
+            } else if (action === '2') {
+                // Renomear
+                const newName = prompt('Novo nome:', name);
+                if (newName !== null && newName.trim() !== '') {
+                    const newEmoji = prompt('Novo emoji (opcional):', emoji);
+                    crafts[index].name = newName.trim();
+                    if (newEmoji !== null && newEmoji.trim() !== '') crafts[index].emoji = newEmoji.trim();
+                    saveCrafts(crafts);
+                    renderEmojiStrip();
+                    document.getElementById('saveFeedback').textContent = `✏️ Craft renomeado para "${newName.trim()}"`;
+                }
+            } else if (action === '3') {
+                // Excluir
+                if (confirm(`Excluir craft "${name}"?`)) {
+                    crafts.splice(index, 1);
+                    saveCrafts(crafts);
+                    renderEmojiStrip();
+                    document.getElementById('saveFeedback').textContent = `🗑️ Craft "${name}" excluído.`;
+                }
+            } else {
+                alert('Opção inválida.');
+            }
+        }
+
+        // ------------------------------------------------------------
+        //  SALVAR CRAFT (com nome, emoji, target e regras)
+        // ------------------------------------------------------------
+        function saveCraft() {
+            const name = document.getElementById('craftName').value.trim() || 'Sem nome';
+            const emoji = document.getElementById('craftEmoji').value.trim() || '📦';
+            const target = parseInt(document.getElementById('target').value) || 0;
+
+            // Coleta regras atuais
+            const rules = [];
+            for (let i = 0; i < 3; i++) {
+                const act = document.getElementById('action' + i).value;
+                if (act === '') continue;
+                const mode = document.getElementById('mode' + i).value;
+                rules.push({ action: act, mode: mode });
+            }
+
+            const crafts = loadCrafts();
+            // Verifica se já existe com mesmo nome (opcional: avisar)
+            const existing = crafts.findIndex(c => c.name === name);
+            if (existing !== -1) {
+                if (!confirm(`Já existe um craft com nome "${name}". Deseja sobrescrever?`)) return;
+                crafts[existing] = { name, emoji, target, rules };
+            } else {
+                crafts.push({ name, emoji, target, rules });
+            }
+            saveCrafts(crafts);
+            renderEmojiStrip();
+            document.getElementById('saveFeedback').textContent = `💾 Craft "${name}" salvo! (${crafts.length} total)`;
+        }
+
+        // ------------------------------------------------------------
+        //  INICIALIZAÇÃO
+        // ------------------------------------------------------------
+        renderEmojiStrip();
+
+        // Se houver um craft salvo, carrega o primeiro? Não, apenas exibe.
+        // Ao carregar a página, já calcula com valores padrão.
+        window.onload = function() {
+            calculate();
+        };
+
+        // expõe funções para botões
+        window.calculate = calculate;
+        window.saveCraft = saveCraft;
+    </script>
+
+</body>
+</html>
