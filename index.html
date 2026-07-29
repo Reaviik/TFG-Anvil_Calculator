@@ -3,668 +3,816 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TFC Anvil Calculator · Crafts</title>
+    <title>TFC Anvil · Calculator</title>
     <style>
+        /* Reset & Base */
         * {
             box-sizing: border-box;
             margin: 0;
+            padding: 0;
         }
 
         body {
-            background: #1e1e1e;
-            color: #f0f0f0;
-            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
-            max-width: 960px;
-            margin: 2rem auto;
-            padding: 0 20px 40px;
+            min-height: 100vh;
+            background: #0f0f11;
+            background-image: 
+                radial-gradient(ellipse at 20% 50%, rgba(40, 45, 50, 0.3) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(40, 45, 50, 0.2) 0%, transparent 60%);
+            color: #d0d4dc;
+            font-family: 'Segoe UI', 'Inter', -apple-system, system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 2rem 1rem;
         }
 
-        h1 {
+        .app {
+            max-width: 960px;
+            width: 100%;
+        }
+
+        /* Header */
+        .header {
             text-align: center;
+            padding: 1.8rem 0 2.2rem;
+            position: relative;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #6a7a7a, transparent);
+        }
+
+        .header h1 {
+            font-weight: 300;
+            font-size: 2.4rem;
+            letter-spacing: 4px;
+            color: #d8dde6;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+        }
+
+        .header h1 span {
+            font-weight: 600;
+            color: #a8b8b8;
+        }
+
+        .header .sub {
+            font-size: 0.8rem;
+            color: #6a7a7a;
+            letter-spacing: 6px;
+            margin-top: 6px;
+            text-transform: uppercase;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(22, 24, 28, 0.85);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(60, 70, 80, 0.35);
+            border-radius: 14px;
+            padding: 1.8rem 2rem;
+            margin-bottom: 1.8rem;
+            box-shadow: 
+                0 8px 32px rgba(0,0,0,0.45),
+                inset 0 1px 0 rgba(120, 140, 160, 0.08);
+            transition: border-color 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(80, 100, 120, 0.5);
+        }
+
+        .card-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: #6a7a8a;
+            margin-bottom: 1.2rem;
             font-weight: 400;
-            letter-spacing: 1px;
-            border-bottom: 1px solid #3a3a3a;
-            padding-bottom: 18px;
-            margin-bottom: 10px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
-            flex-wrap: wrap;
+            gap: 10px;
         }
 
+        .card-title .line {
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(60, 80, 100, 0.3), transparent);
+        }
+
+        /* Emoji Strip */
         .emoji-strip {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            gap: 12px 18px;
-            background: #262626;
-            padding: 12px 20px;
-            border-radius: 60px;
-            margin: 10px auto 25px;
-            max-width: 700px;
-            border: 1px solid #3a3a3a;
+            gap: 6px;
+            background: rgba(16, 18, 22, 0.6);
+            border: 1px solid rgba(60, 70, 80, 0.2);
+            border-radius: 40px;
+            padding: 8px 16px;
+            margin-bottom: 1.8rem;
+            min-height: 52px;
+            align-items: center;
+        }
+
+        .emoji-strip .empty {
+            color: #4a5a5a;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
         }
 
         .emoji-badge {
-            font-size: 2rem;
-            line-height: 1;
-            cursor: pointer;
-            transition: 0.15s;
-            border-radius: 40px;
-            padding: 4px 12px;
-            background: #1f1f1f;
-            border: 1px solid transparent;
             display: inline-flex;
             align-items: center;
             gap: 6px;
+            padding: 4px 14px 4px 10px;
+            border-radius: 30px;
+            background: rgba(40, 48, 56, 0.5);
+            border: 1px solid rgba(60, 80, 100, 0.15);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 1.2rem;
+            color: #b0bcc8;
         }
 
         .emoji-badge:hover {
-            background: #333;
-            border-color: #5a5a5a;
-            transform: scale(1.02);
+            background: rgba(50, 60, 72, 0.6);
+            border-color: rgba(80, 120, 160, 0.3);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
         }
 
         .emoji-badge .tooltip {
             font-size: 0.7rem;
-            background: #111;
-            padding: 2px 10px;
-            border-radius: 30px;
-            color: #bbb;
-            max-width: 120px;
+            color: #7a8a9a;
+            font-weight: 300;
+            max-width: 100px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            font-weight: 300;
         }
 
-        .card {
-            background: #2b2b2b;
-            padding: 20px 24px;
-            border-radius: 16px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-            border: 1px solid #3d3d3d;
-        }
-
+        /* Inputs & Selects */
         label {
             display: block;
-            margin-top: 16px;
-            font-weight: 500;
-            font-size: 0.95rem;
-            color: #ccc;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #6a7a8a;
+            margin-bottom: 4px;
+            font-weight: 400;
         }
 
-        input,
-        select {
+        input, select {
             width: 100%;
-            padding: 12px 14px;
-            margin-top: 6px;
-            background: #3a3a3a;
-            color: white;
-            border: 1px solid #555;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: 0.2s;
+            padding: 10px 14px;
+            background: rgba(12, 14, 18, 0.7);
+            border: 1px solid rgba(50, 65, 80, 0.3);
+            border-radius: 8px;
+            color: #d0d8e0;
+            font-size: 0.95rem;
+            transition: all 0.25s;
+            outline: none;
+            font-family: inherit;
         }
 
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: #7c9c7c;
-            background: #2f2f2f;
+        input:focus, select:focus {
+            border-color: rgba(80, 140, 180, 0.5);
+            background: rgba(16, 20, 26, 0.8);
+            box-shadow: 0 0 0 3px rgba(60, 120, 160, 0.08);
+        }
+
+        input::placeholder {
+            color: #4a5a6a;
+        }
+
+        select option {
+            background: #1a1e24;
+            color: #d0d8e0;
+        }
+
+        /* Rules Grid */
+        .rules-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 6px;
         }
 
         .rule-row {
             display: flex;
-            gap: 12px;
-            margin-bottom: 12px;
+            gap: 10px;
             align-items: center;
-            flex-wrap: wrap;
+            background: rgba(12, 14, 18, 0.3);
+            border-radius: 8px;
+            padding: 6px 10px 6px 14px;
+            border: 1px solid rgba(50, 65, 80, 0.12);
+        }
+
+        .rule-row .pos {
+            font-size: 0.7rem;
+            color: #4a5a6a;
+            min-width: 28px;
+            font-weight: 300;
+            letter-spacing: 0.5px;
         }
 
         .rule-row select {
-            flex: 1;
-            min-width: 120px;
+            padding: 7px 10px;
+            font-size: 0.85rem;
+            background: rgba(8, 10, 14, 0.5);
+            border-color: rgba(50, 65, 80, 0.15);
         }
 
-        button {
+        .rule-row select:focus {
+            border-color: rgba(80, 140, 180, 0.4);
+        }
+
+        /* Button */
+        .btn-primary {
             width: 100%;
-            padding: 16px;
-            margin-top: 26px;
-            font-size: 1.2rem;
-            font-weight: 600;
-            background: #4a7a4a;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: 0.15s;
-            letter-spacing: 0.3px;
-        }
-
-        button:hover {
-            background: #5e9e5e;
-            transform: scale(1.01);
-            box-shadow: 0 4px 12px #2f5a2f;
-        }
-
-        .result-panel {
-            background: #1f1f1f;
-            border-radius: 14px;
-            padding: 16px 20px;
-            margin-top: 16px;
-            border-left: 6px solid #5a8f5a;
-        }
-
-        .result-panel h3 {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
-            color: #c6e0c6;
-        }
-
-        pre {
-            white-space: pre-wrap;
-            background: #141414;
-            padding: 18px;
-            border-radius: 12px;
-            overflow: auto;
-            max-height: 480px;
+            padding: 14px;
+            margin-top: 1.5rem;
             font-size: 0.95rem;
-            line-height: 1.5;
-            border: 1px solid #333;
-            color: #e0e0e0;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            background: linear-gradient(135deg, rgba(40, 60, 80, 0.6), rgba(30, 45, 60, 0.4));
+            border: 1px solid rgba(60, 90, 120, 0.25);
+            border-radius: 10px;
+            color: #b0c8d8;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
         }
 
-        /* Estilo para os passos com imagens */
-        .step-image {
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 8px;
+        .btn-primary:hover {
+            background: linear-gradient(135deg, rgba(50, 80, 110, 0.5), rgba(40, 60, 80, 0.3));
+            border-color: rgba(80, 140, 180, 0.35);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(0, 20, 40, 0.3);
+            color: #d0dce8;
         }
 
-        .step-image img {
-            width: 32px;
-            height: 32px;
-            object-fit: contain;
-            image-rendering: pixelated;
-            background: #1a1a1a;
-            border-radius: 6px;
-            padding: 2px;
-            border: 1px solid #3a3a3a;
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Result */
+        .result-panel {
+            background: rgba(10, 12, 16, 0.6);
+            border-radius: 10px;
+            padding: 1.2rem 1.5rem;
+            border-left: 3px solid rgba(80, 140, 180, 0.25);
+            min-height: 60px;
+        }
+
+        .result-success {
+            color: #8ab8b0;
+            font-size: 0.95rem;
+        }
+
+        .result-success strong {
+            color: #b0d0d0;
+            font-weight: 500;
+        }
+
+        .result-hits {
+            color: #6a8a8a;
+            font-size: 0.85rem;
+            margin: 6px 0 12px;
+        }
+
+        .result-steps {
+            background: rgba(6, 8, 12, 0.4);
+            border-radius: 8px;
+            padding: 10px 14px;
+            border: 1px solid rgba(50, 65, 80, 0.1);
         }
 
         .step-line {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 2px 0;
-        }
-
-        .step-number {
-            color: #888;
-            min-width: 30px;
-            font-size: 0.85rem;
-        }
-
-        .step-name {
-            color: #ccc;
+            gap: 10px;
+            padding: 3px 0;
             font-size: 0.9rem;
         }
 
+        .step-number {
+            color: #4a5a6a;
+            min-width: 32px;
+            font-size: 0.75rem;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .step-image {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .step-image img {
+            width: 28px;
+            height: 28px;
+            object-fit: contain;
+            image-rendering: pixelated;
+            background: rgba(10, 14, 20, 0.5);
+            border-radius: 4px;
+            padding: 2px;
+            border: 1px solid rgba(50, 65, 80, 0.12);
+        }
+
+        .step-name {
+            color: #b8c4d0;
+            font-weight: 300;
+        }
+
+        .result-error {
+            color: #b08070;
+            padding: 10px 0;
+        }
+
+        /* Save Area */
         .save-area {
             display: flex;
             flex-wrap: wrap;
             align-items: center;
-            gap: 12px;
-            margin: 18px 0 8px;
-            background: #252525;
-            padding: 12px 16px;
-            border-radius: 40px;
+            gap: 10px;
+            margin-top: 1.2rem;
+            padding-top: 1.2rem;
+            border-top: 1px solid rgba(50, 65, 80, 0.12);
         }
 
         .save-area input {
-            flex: 2;
-            min-width: 140px;
-            background: #333;
-            padding: 10px 14px;
-            margin: 0;
-        }
-
-        .save-area button {
-            flex: 0 1 auto;
-            width: auto;
-            padding: 10px 22px;
-            margin: 0;
-            background: #3d6b8f;
-            font-size: 1rem;
-        }
-
-        .save-area button:hover {
-            background: #5086b0;
-        }
-
-        .craft-actions {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 6px;
-        }
-
-        .craft-actions button {
-            width: auto;
-            padding: 4px 16px;
-            margin: 2px;
+            flex: 1;
+            min-width: 100px;
+            padding: 8px 12px;
             font-size: 0.85rem;
-            background: #3d3d3d;
-            border-radius: 30px;
+        }
+
+        .save-area input#craftEmoji {
+            flex: 0 0 60px;
+            min-width: 60px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+
+        .btn-save {
+            padding: 8px 24px;
+            background: rgba(40, 60, 80, 0.3);
+            border: 1px solid rgba(60, 90, 120, 0.2);
+            border-radius: 8px;
+            color: #8aa8b8;
+            cursor: pointer;
+            transition: all 0.25s;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: inherit;
             font-weight: 400;
         }
 
-        .craft-actions button:hover {
-            background: #555;
+        .btn-save:hover {
+            background: rgba(50, 80, 110, 0.3);
+            border-color: rgba(80, 140, 180, 0.3);
+            color: #b0c8d8;
         }
 
-        .craft-actions .del {
-            background: #6b3d3d;
+        .save-feedback {
+            font-size: 0.75rem;
+            color: #5a7a7a;
+            margin-top: 4px;
+            width: 100%;
+            text-align: center;
         }
 
-        .craft-actions .del:hover {
-            background: #8f4a4a;
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: rgba(10, 12, 16, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(60, 80, 100, 0.3);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(80, 100, 120, 0.4);
         }
 
-        .inline-flex {
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .badge-emoji {
-            font-size: 1.8rem;
-            line-height: 1;
-        }
-
-        .text-muted {
-            color: #999;
-            font-size: 0.8rem;
-        }
-
-        @media (max-width: 600px) {
+        /* Responsive */
+        @media (max-width: 640px) {
+            .card {
+                padding: 1.2rem 1rem;
+            }
+            .header h1 {
+                font-size: 1.6rem;
+                letter-spacing: 2px;
+            }
             .rule-row {
-                flex-direction: column;
+                flex-wrap: wrap;
+                padding: 8px 10px;
+            }
+            .rule-row select {
+                flex: 1;
+                min-width: 80px;
             }
             .save-area {
                 flex-direction: column;
                 align-items: stretch;
             }
+            .save-area input#craftEmoji {
+                flex: 1;
+                min-width: auto;
+            }
+            .btn-save {
+                width: 100%;
+            }
             .step-image img {
-                width: 28px;
-                height: 28px;
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .rule-row .pos {
+                display: none;
+            }
+            .emoji-strip {
+                gap: 4px;
+                padding: 6px 10px;
+            }
+            .emoji-badge {
+                font-size: 1rem;
+                padding: 2px 10px 2px 6px;
+            }
+            .emoji-badge .tooltip {
+                display: none;
             }
         }
     </style>
 </head>
 <body>
 
-    <h1>⚒️ TFC Anvil · Calculator</h1>
+<div class="app">
 
-    <!-- Emojis dos crafts salvos -->
-    <div id="emojiStrip" class="emoji-strip"></div>
+    <!-- Header -->
+    <header class="header">
+        <h1>⚙️ <span>ANVIL</span> · CALC</h1>
+        <div class="sub">TerraFirmaCraft · Forge</div>
+    </header>
 
+    <!-- Emoji Strip -->
+    <div id="emojiStrip" class="emoji-strip">
+        <span class="empty">⏳ nenhum craft salvo</span>
+    </div>
+
+    <!-- Main Card -->
     <div class="card">
-        <label>🎯 Valor Final</label>
+        <div class="card-title">
+            <span>🎯 Target</span>
+            <span class="line"></span>
+        </div>
         <input id="target" type="number" value="112">
 
-        <h3 style="margin-top:24px;">⛓️ Restrições (últimos 3 passos)</h3>
-        <div id="rules"></div>
+        <div class="card-title" style="margin-top:1.8rem;">
+            <span>⛓️ Constraints · last 3 steps</span>
+            <span class="line"></span>
+        </div>
 
-        <button onclick="calculate()">🔨 Calcular</button>
+        <div class="rules-grid" id="rules"></div>
+
+        <button class="btn-primary" onclick="calculate()">⟳ Calculate</button>
     </div>
 
+    <!-- Result Card -->
     <div class="card">
-        <h2 style="display:flex; align-items:center; gap:8px;">📋 Resultado</h2>
-        <div id="resultContainer">
-            <div id="output">Nenhum cálculo.</div>
+        <div class="card-title">
+            <span>📋 Result</span>
+            <span class="line"></span>
         </div>
 
-        <!-- Área de salvar craft -->
-        <div class="save-area">
-            <input id="craftName" placeholder="Nome do craft (ex: Espada)" value="Meu craft">
-            <input id="craftEmoji" placeholder="Emoji" value="⚔️" style="flex:0.5; min-width:70px;">
-            <button onclick="saveCraft()">💾 Salvar craft</button>
+        <div class="result-panel" id="resultContainer">
+            <div id="output" style="color:#5a6a7a; font-size:0.85rem; padding:4px 0;">
+                ⚡ aguardando cálculo...
+            </div>
         </div>
-        <div id="saveFeedback" class="text-muted" style="margin-top:6px;"></div>
+
+        <!-- Save Area -->
+        <div class="save-area">
+            <input id="craftName" placeholder="Nome do craft" value="Meu craft">
+            <input id="craftEmoji" placeholder="⚔️" value="⚔️">
+            <button class="btn-save" onclick="saveCraft()">💾 Salvar</button>
+            <div class="save-feedback" id="saveFeedback"></div>
+        </div>
     </div>
 
-    <script>
-        // ------------------------------------------------------------
-        //  AÇÕES E REGRAS
-        // ------------------------------------------------------------
-        const actions = [
-            { name: "Light Hit", value: -3 },
-            { name: "Medium Hit", value: -6 },
-            { name: "Hard Hit", value: -9 },
-            { name: "Draw", value: -15 },
-            { name: "Punch", value: 2 },
-            { name: "Bend", value: 7 },
-            { name: "Upset", value: 13 },
-            { name: "Shrink", value: 16 },
-        ];
+</div>
 
-        const imageMap = {
-            "Light Hit": "hit_light",
-            "Medium Hit": "hit_medium",
-            "Hard Hit": "hit_hard",
-            "Draw": "draw",
-            "Punch": "punch",
-            "Bend": "bend",
-            "Upset": "upset",
-            "Shrink": "shrink"
-        };
+<script>
+    // ------------------------------------------------------------
+    //  AÇÕES E REGRAS
+    // ------------------------------------------------------------
+    const actions = [
+        { name: "Light Hit", value: -3 },
+        { name: "Medium Hit", value: -6 },
+        { name: "Hard Hit", value: -9 },
+        { name: "Draw", value: -15 },
+        { name: "Punch", value: 2 },
+        { name: "Bend", value: 7 },
+        { name: "Upset", value: 13 },
+        { name: "Shrink", value: 16 },
+    ];
 
-        const hitActions = ["Light Hit", "Medium Hit", "Hard Hit"];
-        const modes = ["Any", "Last", "Not Last"];
-        const names = actions.map(a => a.name);
-        const allActions = ["Any Hit", ...names];
+    const imageMap = {
+        "Light Hit": "hit_light",
+        "Medium Hit": "hit_medium",
+        "Hard Hit": "hit_hard",
+        "Draw": "draw",
+        "Punch": "punch",
+        "Bend": "bend",
+        "Upset": "upset",
+        "Shrink": "shrink"
+    };
 
-        // ------------------------------------------------------------
-        //  INJECT RULES UI
-        // ------------------------------------------------------------
-        const rulesDiv = document.getElementById("rules");
+    const hitActions = ["Light Hit", "Medium Hit", "Hard Hit"];
+    const modes = ["Any", "Last", "Not Last"];
+    const names = actions.map(a => a.name);
+    const allActions = ["Any Hit", ...names];
+
+    // ------------------------------------------------------------
+    //  INJECT RULES UI
+    // ------------------------------------------------------------
+    const rulesDiv = document.getElementById("rules");
+    for (let i = 0; i < 3; i++) {
+        let html = `
+            <div class="rule-row">
+                <span class="pos">${i+1}º</span>
+                <select id="action${i}">
+                    <option value="">Nenhum</option>
+                    ${allActions.map(n => `<option>${n}</option>`).join("")}
+                </select>
+                <select id="mode${i}">
+                    ${modes.map(m => `<option>${m}</option>`).join("")}
+                </select>
+            </div>
+        `;
+        rulesDiv.innerHTML += html;
+    }
+
+    // ------------------------------------------------------------
+    //  LÓGICA DE VALIDAÇÃO (obey)
+    // ------------------------------------------------------------
+    function obey(path) {
+        const rules = [];
         for (let i = 0; i < 3; i++) {
-            let html = `
-                <div class="rule-row">
-                    <span style="color:#888; min-width:30px;">${i+1}º</span>
-                    <select id="action${i}">
-                        <option value="">Nenhum</option>
-                        ${allActions.map(n => `<option>${n}</option>`).join("")}
-                    </select>
-                    <select id="mode${i}">
-                        ${modes.map(m => `<option>${m}</option>`).join("")}
-                    </select>
-                </div>
-            `;
-            rulesDiv.innerHTML += html;
-        }
-
-        // ------------------------------------------------------------
-        //  LÓGICA DE VALIDAÇÃO (obey) - CORRIGIDA
-        // ------------------------------------------------------------
-        function obey(path) {
-            // Coleta as regras configuradas
-            const rules = [];
-            for (let i = 0; i < 3; i++) {
-                const act = document.getElementById("action" + i).value;
-                if (act === "") continue;
-                rules.push({
-                    position: i, // 0 = último passo, 1 = penúltimo, 2 = antepenúltimo
-                    action: act,
-                    mode: document.getElementById("mode" + i).value
-                });
-            }
-            if (rules.length === 0) return true;
-
-            const lastThree = path.slice(-3);
-            // Inverte para que a posição 0 seja o último passo
-            const reversed = [...lastThree].reverse();
-
-            // Para cada regra, verifica se a posição específica atende
-            for (const r of rules) {
-                const pos = r.position;
-                // Se o path tem menos que 3 passos, não tem como verificar posições específicas
-                if (lastThree.length < 3) return false;
-                
-                const actionAtPosition = reversed[pos];
-                
-                if (r.action === "Any Hit") {
-                    // Verifica se a ação na posição específica é um hit
-                    const isHit = hitActions.includes(actionAtPosition);
-                    if (!isHit) return false;
-                } else {
-                    // Ação específica
-                    if (actionAtPosition !== r.action) return false;
-                    
-                    // Verifica modo Last/Not Last (apenas para a posição 0 = último)
-                    if (pos === 0) {
-                        if (r.mode === "Last" && actionAtPosition !== r.action) return false;
-                        if (r.mode === "Not Last" && actionAtPosition === r.action) return false;
-                    }
-                }
-            }
-            return true;
-        }
-
-        // ------------------------------------------------------------
-        //  FUNÇÃO PARA GERAR HTML DO PASSO COM IMAGEM
-        // ------------------------------------------------------------
-        function renderStep(stepNumber, actionName) {
-            const imageName = imageMap[actionName] || actionName.toLowerCase().replace(/ /g, '_');
-            return `
-                <div class="step-line">
-                    <span class="step-number">${String(stepNumber).padStart(2, ' ')}.</span>
-                    <span class="step-image">
-                        <img src="${imageName}.png" 
-                             alt="${actionName}" 
-                             onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
-                        <span style="display:none;">${actionName}</span>
-                    </span>
-                    <span class="step-name">${actionName}</span>
-                </div>
-            `;
-        }
-
-        // ------------------------------------------------------------
-        //  CÁLCULO PRINCIPAL
-        // ------------------------------------------------------------
-        function calculate() {
-            const target = parseInt(document.getElementById("target").value);
-            const start = 0;
-            let bestSolution = null;
-            let minSteps = Infinity;
-
-            for (let maxDepth = 1; maxDepth <= 40; maxDepth++) {
-                const queue = [{ value: start, path: [] }];
-                const visited = new Set();
-                visited.add(start + "|");
-
-                while (queue.length) {
-                    const node = queue.shift();
-                    if (node.value === target && obey(node.path)) {
-                        if (node.path.length < minSteps) {
-                            minSteps = node.path.length;
-                            bestSolution = node;
-                        }
-                    }
-                    if (node.path.length >= maxDepth) continue;
-
-                    for (const a of actions) {
-                        const nextValue = node.value + a.value;
-                        if (nextValue < -100 || nextValue > 250) continue;
-                        const nextPath = [...node.path, a.name];
-                        const key = nextValue + "|" + nextPath.slice(-3).join(",");
-                        if (visited.has(key)) continue;
-                        visited.add(key);
-                        queue.push({ value: nextValue, path: nextPath });
-                    }
-                }
-
-                if (bestSolution) {
-                    break;
-                }
-            }
-
-            const output = document.getElementById("output");
-            if (!bestSolution) {
-                output.innerHTML = '<div style="color:#f0a0a0; padding:10px;">❌ Nenhuma solução encontrada.</div>';
-                return;
-            }
-
-            const sol = bestSolution;
-            let html = `
-                <div style="margin-bottom:12px; color:#b0d0b0;">
-                    ✅ Solução encontrada com <strong>${sol.path.length}</strong> passos
-                    <span style="margin-left:16px; color:#aaa;">🎯 Valor final: ${sol.value}</span>
-                </div>
-            `;
-
-            const lightHits = sol.path.filter(p => p === "Light Hit").length;
-            const mediumHits = sol.path.filter(p => p === "Medium Hit").length;
-            const hardHits = sol.path.filter(p => p === "Hard Hit").length;
-            if (lightHits + mediumHits + hardHits > 0) {
-                html += `<div style="margin-bottom:12px; color:#aaa;">
-                    ⚡ Hits: Light=${lightHits}, Medium=${mediumHits}, Hard=${hardHits}
-                </div>`;
-            }
-
-            html += `<div style="background:#1a1a1a; padding:12px 16px; border-radius:10px; border:1px solid #333;">`;
-            sol.path.forEach((p, i) => {
-                html += renderStep(i + 1, p);
-            });
-            html += `</div>`;
-
-            output.innerHTML = html;
-            window._lastSolution = sol;
-        }
-
-        // ------------------------------------------------------------
-        //  GERENCIAMENTO DE CRAFTS
-        // ------------------------------------------------------------
-        function loadCrafts() {
-            try {
-                return JSON.parse(localStorage.getItem('tfc_crafts')) || [];
-            } catch { return []; }
-        }
-
-        function saveCrafts(crafts) {
-            localStorage.setItem('tfc_crafts', JSON.stringify(crafts));
-        }
-
-        function renderEmojiStrip() {
-            const strip = document.getElementById('emojiStrip');
-            const crafts = loadCrafts();
-            if (crafts.length === 0) {
-                strip.innerHTML = '<span class="text-muted" style="padding:4px 12px;">Nenhum craft salvo</span>';
-                return;
-            }
-            strip.innerHTML = crafts.map((c, idx) => {
-                const emoji = c.emoji || '📦';
-                const name = c.name || 'sem nome';
-                return `<span class="emoji-badge" data-index="${idx}" title="${name}">
-                            ${emoji}
-                            <span class="tooltip">${name}</span>
-                        </span>`;
-            }).join('');
-
-            document.querySelectorAll('.emoji-badge').forEach(el => {
-                el.addEventListener('click', function(e) {
-                    const idx = parseInt(this.dataset.index);
-                    showCraftActions(idx, this);
-                });
+            const act = document.getElementById("action" + i).value;
+            if (act === "") continue;
+            rules.push({
+                position: i,
+                action: act,
+                mode: document.getElementById("mode" + i).value
             });
         }
+        if (rules.length === 0) return true;
 
-        function showCraftActions(index, element) {
-            const crafts = loadCrafts();
-            const craft = crafts[index];
-            if (!craft) return;
+        const lastThree = path.slice(-3);
+        if (lastThree.length < 3) return false;
+        const reversed = [...lastThree].reverse();
 
-            const name = craft.name || 'sem nome';
-            const emoji = craft.emoji || '📦';
-
-            const action = prompt(
-                `🧰 Craft: ${emoji} ${name}\n\nEscolha uma ação:\n1 - Carregar\n2 - Renomear\n3 - Excluir\n\nDigite o número (1,2,3):`,
-                '1'
-            );
-            if (action === null) return;
-
-            if (action === '1') {
-                if (craft.target !== undefined) {
-                    document.getElementById('target').value = craft.target;
+        for (const r of rules) {
+            const actionAtPosition = reversed[r.position];
+            if (r.action === "Any Hit") {
+                if (!hitActions.includes(actionAtPosition)) return false;
+            } else {
+                if (actionAtPosition !== r.action) return false;
+                if (r.position === 0) {
+                    if (r.mode === "Last" && actionAtPosition !== r.action) return false;
+                    if (r.mode === "Not Last" && actionAtPosition === r.action) return false;
                 }
-                if (craft.rules && Array.isArray(craft.rules)) {
-                    for (let i = 0; i < 3; i++) {
-                        const selAction = document.getElementById('action' + i);
-                        const selMode = document.getElementById('mode' + i);
-                        if (i < craft.rules.length) {
-                            const rule = craft.rules[i];
-                            selAction.value = rule.action || '';
-                            selMode.value = rule.mode || 'Any';
-                        } else {
-                            selAction.value = '';
-                            selMode.value = 'Any';
-                        }
+            }
+        }
+        return true;
+    }
+
+    // ------------------------------------------------------------
+    //  RENDER STEP
+    // ------------------------------------------------------------
+    function renderStep(stepNumber, actionName) {
+        const imageName = imageMap[actionName] || actionName.toLowerCase().replace(/ /g, '_');
+        return `
+            <div class="step-line">
+                <span class="step-number">${String(stepNumber).padStart(2, ' ')}.</span>
+                <span class="step-image">
+                    <img src="${imageName}.png" 
+                         alt="${actionName}" 
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                    <span style="display:none;">${actionName}</span>
+                </span>
+                <span class="step-name">${actionName}</span>
+            </div>
+        `;
+    }
+
+    // ------------------------------------------------------------
+    //  CALCULATE
+    // ------------------------------------------------------------
+    function calculate() {
+        const target = parseInt(document.getElementById("target").value);
+        const start = 0;
+        let bestSolution = null;
+        let minSteps = Infinity;
+
+        for (let maxDepth = 1; maxDepth <= 40; maxDepth++) {
+            const queue = [{ value: start, path: [] }];
+            const visited = new Set();
+            visited.add(start + "|");
+
+            while (queue.length) {
+                const node = queue.shift();
+                if (node.value === target && obey(node.path)) {
+                    if (node.path.length < minSteps) {
+                        minSteps = node.path.length;
+                        bestSolution = node;
                     }
                 }
-                document.getElementById('craftName').value = craft.name || '';
-                document.getElementById('craftEmoji').value = craft.emoji || '⚔️';
-                calculate();
-                document.getElementById('saveFeedback').textContent = `✅ Craft "${name}" carregado.`;
-            } else if (action === '2') {
-                const newName = prompt('Novo nome:', name);
-                if (newName !== null && newName.trim() !== '') {
-                    const newEmoji = prompt('Novo emoji (opcional):', emoji);
-                    crafts[index].name = newName.trim();
-                    if (newEmoji !== null && newEmoji.trim() !== '') crafts[index].emoji = newEmoji.trim();
-                    saveCrafts(crafts);
-                    renderEmojiStrip();
-                    document.getElementById('saveFeedback').textContent = `✏️ Craft renomeado para "${newName.trim()}"`;
+                if (node.path.length >= maxDepth) continue;
+
+                for (const a of actions) {
+                    const nextValue = node.value + a.value;
+                    if (nextValue < -100 || nextValue > 250) continue;
+                    const nextPath = [...node.path, a.name];
+                    const key = nextValue + "|" + nextPath.slice(-3).join(",");
+                    if (visited.has(key)) continue;
+                    visited.add(key);
+                    queue.push({ value: nextValue, path: nextPath });
                 }
-            } else if (action === '3') {
-                if (confirm(`Excluir craft "${name}"?`)) {
-                    crafts.splice(index, 1);
-                    saveCrafts(crafts);
-                    renderEmojiStrip();
-                    document.getElementById('saveFeedback').textContent = `🗑️ Craft "${name}" excluído.`;
-                }
-            } else {
-                alert('Opção inválida.');
             }
+
+            if (bestSolution) break;
         }
 
-        function saveCraft() {
-            const name = document.getElementById('craftName').value.trim() || 'Sem nome';
-            const emoji = document.getElementById('craftEmoji').value.trim() || '📦';
-            const target = parseInt(document.getElementById('target').value) || 0;
-
-            const rules = [];
-            for (let i = 0; i < 3; i++) {
-                const act = document.getElementById('action' + i).value;
-                if (act === '') continue;
-                const mode = document.getElementById('mode' + i).value;
-                rules.push({ action: act, mode: mode });
-            }
-
-            const crafts = loadCrafts();
-            const existing = crafts.findIndex(c => c.name === name);
-            if (existing !== -1) {
-                if (!confirm(`Já existe um craft com nome "${name}". Deseja sobrescrever?`)) return;
-                crafts[existing] = { name, emoji, target, rules };
-            } else {
-                crafts.push({ name, emoji, target, rules });
-            }
-            saveCrafts(crafts);
-            renderEmojiStrip();
-            document.getElementById('saveFeedback').textContent = `💾 Craft "${name}" salvo! (${crafts.length} total)`;
+        const output = document.getElementById("output");
+        if (!bestSolution) {
+            output.innerHTML = '<div class="result-error">⛔ Nenhuma solução encontrada.</div>';
+            return;
         }
 
-        // ------------------------------------------------------------
-        //  INICIALIZAÇÃO
-        // ------------------------------------------------------------
-        renderEmojiStrip();
+        const sol = bestSolution;
+        let html = `
+            <div class="result-success">
+                ✅ Solução com <strong>${sol.path.length}</strong> passos
+                <span style="margin-left:16px; color:#6a8a8a;">🎯 ${sol.value}</span>
+            </div>
+        `;
 
-        window.onload = function() {
+        const lightHits = sol.path.filter(p => p === "Light Hit").length;
+        const mediumHits = sol.path.filter(p => p === "Medium Hit").length;
+        const hardHits = sol.path.filter(p => p === "Hard Hit").length;
+        if (lightHits + mediumHits + hardHits > 0) {
+            html += `<div class="result-hits">⚡ Light=${lightHits} · Medium=${mediumHits} · Hard=${hardHits}</div>`;
+        }
+
+        html += `<div class="result-steps">`;
+        sol.path.forEach((p, i) => {
+            html += renderStep(i + 1, p);
+        });
+        html += `</div>`;
+
+        output.innerHTML = html;
+        window._lastSolution = sol;
+    }
+
+    // ------------------------------------------------------------
+    //  CRAFTS STORAGE
+    // ------------------------------------------------------------
+    function loadCrafts() {
+        try {
+            return JSON.parse(localStorage.getItem('tfc_crafts')) || [];
+        } catch { return []; }
+    }
+
+    function saveCrafts(crafts) {
+        localStorage.setItem('tfc_crafts', JSON.stringify(crafts));
+    }
+
+    function renderEmojiStrip() {
+        const strip = document.getElementById('emojiStrip');
+        const crafts = loadCrafts();
+        if (crafts.length === 0) {
+            strip.innerHTML = '<span class="empty">⏳ nenhum craft salvo</span>';
+            return;
+        }
+        strip.innerHTML = crafts.map((c, idx) => {
+            const emoji = c.emoji || '📦';
+            const name = c.name || 'sem nome';
+            return `<span class="emoji-badge" data-index="${idx}" title="${name}">
+                        ${emoji}
+                        <span class="tooltip">${name}</span>
+                    </span>`;
+        }).join('');
+
+        document.querySelectorAll('.emoji-badge').forEach(el => {
+            el.addEventListener('click', function() {
+                const idx = parseInt(this.dataset.index);
+                showCraftActions(idx);
+            });
+        });
+    }
+
+    function showCraftActions(index) {
+        const crafts = loadCrafts();
+        const craft = crafts[index];
+        if (!craft) return;
+
+        const name = craft.name || 'sem nome';
+        const emoji = craft.emoji || '📦';
+
+        const action = prompt(
+            `🧰 ${emoji} ${name}\n\n1 - Carregar\n2 - Renomear\n3 - Excluir`,
+            '1'
+        );
+        if (action === null) return;
+
+        if (action === '1') {
+            if (craft.target !== undefined) document.getElementById('target').value = craft.target;
+            if (craft.rules && Array.isArray(craft.rules)) {
+                for (let i = 0; i < 3; i++) {
+                    const selAction = document.getElementById('action' + i);
+                    const selMode = document.getElementById('mode' + i);
+                    if (i < craft.rules.length) {
+                        selAction.value = craft.rules[i].action || '';
+                        selMode.value = craft.rules[i].mode || 'Any';
+                    } else {
+                        selAction.value = '';
+                        selMode.value = 'Any';
+                    }
+                }
+            }
+            document.getElementById('craftName').value = craft.name || '';
+            document.getElementById('craftEmoji').value = craft.emoji || '⚔️';
             calculate();
-        };
+            document.getElementById('saveFeedback').textContent = `✅ "${name}" carregado`;
+        } else if (action === '2') {
+            const newName = prompt('Novo nome:', name);
+            if (newName && newName.trim() !== '') {
+                const newEmoji = prompt('Novo emoji:', emoji);
+                crafts[index].name = newName.trim();
+                if (newEmoji && newEmoji.trim() !== '') crafts[index].emoji = newEmoji.trim();
+                saveCrafts(crafts);
+                renderEmojiStrip();
+                document.getElementById('saveFeedback').textContent = `✏️ renomeado para "${newName.trim()}"`;
+            }
+        } else if (action === '3') {
+            if (confirm(`Excluir "${name}"?`)) {
+                crafts.splice(index, 1);
+                saveCrafts(crafts);
+                renderEmojiStrip();
+                document.getElementById('saveFeedback').textContent = `🗑️ "${name}" excluído`;
+            }
+        }
+    }
 
-        window.calculate = calculate;
-        window.saveCraft = saveCraft;
-    </script>
+    function saveCraft() {
+        const name = document.getElementById('craftName').value.trim() || 'Sem nome';
+        const emoji = document.getElementById('craftEmoji').value.trim() || '📦';
+        const target = parseInt(document.getElementById('target').value) || 0;
+
+        const rules = [];
+        for (let i = 0; i < 3; i++) {
+            const act = document.getElementById('action' + i).value;
+            if (act === '') continue;
+            rules.push({ action: act, mode: document.getElementById('mode' + i).value });
+        }
+
+        const crafts = loadCrafts();
+        const existing = crafts.findIndex(c => c.name === name);
+        if (existing !== -1) {
+            if (!confirm(`Já existe "${name}". Sobrescrever?`)) return;
+            crafts[existing] = { name, emoji, target, rules };
+        } else {
+            crafts.push({ name, emoji, target, rules });
+        }
+        saveCrafts(crafts);
+        renderEmojiStrip();
+        document.getElementById('saveFeedback').textContent = `💾 "${name}" salvo (${crafts.length} total)`;
+    }
+
+    // ------------------------------------------------------------
+    //  INIT
+    // ------------------------------------------------------------
+    renderEmojiStrip();
+    window.onload = calculate;
+    window.calculate = calculate;
+    window.saveCraft = saveCraft;
+</script>
 
 </body>
-</html> 
+</html>
