@@ -344,7 +344,7 @@
 
     <script>
         // ------------------------------------------------------------
-        //  AÇÕES E REGRAS (mesmo do original)
+        //  AÇÕES E REGRAS
         // ------------------------------------------------------------
         const actions = [
             { name: "Light Hit", value: -3 },
@@ -357,7 +357,6 @@
             { name: "Shrink", value: 16 },
         ];
 
-        // Mapeamento dos nomes das ações para os nomes dos arquivos de imagem
         const imageMap = {
             "Light Hit": "hit_light",
             "Medium Hit": "hit_medium",
@@ -381,6 +380,7 @@
         for (let i = 0; i < 3; i++) {
             let html = `
                 <div class="rule-row">
+                    <span style="color:#888; min-width:30px;">${i+1}º</span>
                     <select id="action${i}">
                         <option value="">Nenhum</option>
                         ${allActions.map(n => `<option>${n}</option>`).join("")}
@@ -394,41 +394,48 @@
         }
 
         // ------------------------------------------------------------
-        //  LÓGICA DE VALIDAÇÃO (obey)
+        //  LÓGICA DE VALIDAÇÃO (obey) - CORRIGIDA
         // ------------------------------------------------------------
         function obey(path) {
+            // Coleta as regras configuradas
             const rules = [];
             for (let i = 0; i < 3; i++) {
                 const act = document.getElementById("action" + i).value;
                 if (act === "") continue;
                 rules.push({
+                    position: i, // 0 = último passo, 1 = penúltimo, 2 = antepenúltimo
                     action: act,
                     mode: document.getElementById("mode" + i).value
                 });
             }
             if (rules.length === 0) return true;
 
-            const hasAnyHitRule = rules.some(r => r.action === "Any Hit");
-            if (hasAnyHitRule) {
-                const lastThree = path.slice(-3);
-                const hasAnyHit = lastThree.some(action => hitActions.includes(action));
-                if (!hasAnyHit) return false;
-            }
-
             const lastThree = path.slice(-3);
+            // Inverte para que a posição 0 seja o último passo
+            const reversed = [...lastThree].reverse();
+
+            // Para cada regra, verifica se a posição específica atende
             for (const r of rules) {
-                if (r.action === "Any Hit") continue;
-                if (hitActions.includes(r.action)) {
-                    const idx = lastThree.indexOf(r.action);
-                    if (idx === -1) return false;
-                    if (r.mode === "Last" && lastThree[lastThree.length - 1] !== r.action) return false;
-                    if (r.mode === "Not Last" && lastThree[lastThree.length - 1] === r.action) return false;
-                    continue;
+                const pos = r.position;
+                // Se o path tem menos que 3 passos, não tem como verificar posições específicas
+                if (lastThree.length < 3) return false;
+                
+                const actionAtPosition = reversed[pos];
+                
+                if (r.action === "Any Hit") {
+                    // Verifica se a ação na posição específica é um hit
+                    const isHit = hitActions.includes(actionAtPosition);
+                    if (!isHit) return false;
+                } else {
+                    // Ação específica
+                    if (actionAtPosition !== r.action) return false;
+                    
+                    // Verifica modo Last/Not Last (apenas para a posição 0 = último)
+                    if (pos === 0) {
+                        if (r.mode === "Last" && actionAtPosition !== r.action) return false;
+                        if (r.mode === "Not Last" && actionAtPosition === r.action) return false;
+                    }
                 }
-                const idx = lastThree.indexOf(r.action);
-                if (idx === -1) return false;
-                if (r.mode === "Last" && lastThree[lastThree.length - 1] !== r.action) return false;
-                if (r.mode === "Not Last" && lastThree[lastThree.length - 1] === r.action) return false;
             }
             return true;
         }
@@ -438,7 +445,6 @@
         // ------------------------------------------------------------
         function renderStep(stepNumber, actionName) {
             const imageName = imageMap[actionName] || actionName.toLowerCase().replace(/ /g, '_');
-            // Tenta carregar a imagem, se não existir, mostra o texto
             return `
                 <div class="step-line">
                     <span class="step-number">${String(stepNumber).padStart(2, ' ')}.</span>
@@ -454,7 +460,7 @@
         }
 
         // ------------------------------------------------------------
-        //  CÁLCULO PRINCIPAL (BFS por profundidade, retorna apenas 1 solução mais curta)
+        //  CÁLCULO PRINCIPAL
         // ------------------------------------------------------------
         function calculate() {
             const target = parseInt(document.getElementById("target").value);
@@ -499,7 +505,6 @@
                 return;
             }
 
-            // Exibe apenas a melhor solução (mais curta) com imagens
             const sol = bestSolution;
             let html = `
                 <div style="margin-bottom:12px; color:#b0d0b0;">
@@ -517,7 +522,6 @@
                 </div>`;
             }
 
-            // Lista os passos com imagens
             html += `<div style="background:#1a1a1a; padding:12px 16px; border-radius:10px; border:1px solid #333;">`;
             sol.path.forEach((p, i) => {
                 html += renderStep(i + 1, p);
@@ -525,12 +529,11 @@
             html += `</div>`;
 
             output.innerHTML = html;
-            // guarda para salvar
             window._lastSolution = sol;
         }
 
         // ------------------------------------------------------------
-        //  GERENCIAMENTO DE CRAFTS (localStorage)
+        //  GERENCIAMENTO DE CRAFTS
         // ------------------------------------------------------------
         function loadCrafts() {
             try {
@@ -664,4 +667,4 @@
     </script>
 
 </body>
-</html>
+</html> 
