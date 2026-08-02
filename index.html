@@ -233,6 +233,14 @@
             border-color: rgba(80, 140, 180, 0.4);
         }
 
+        .rule-row select:first-of-type {
+            flex: 1.5;
+        }
+
+        .rule-row select:last-of-type {
+            flex: 1;
+        }
+
         /* Button */
         .btn-primary {
             width: 100%;
@@ -424,6 +432,10 @@
                 flex: 1;
                 min-width: 80px;
             }
+            .rule-row select:first-of-type {
+                flex: 1;
+                min-width: 100px;
+            }
             .save-area {
                 flex-direction: column;
                 align-items: stretch;
@@ -543,7 +555,7 @@
     };
 
     const hitActions = ["Light Hit", "Medium Hit", "Hard Hit"];
-    const modes = ["Any", "Last", "Not Last"];
+    const positionModes = ["Any", "Last", "Second Last", "Third Last"];
     const names = actions.map(a => a.name);
     const allActions = ["Any Hit", ...names];
 
@@ -559,8 +571,8 @@
                     <option value="">Nenhum</option>
                     ${allActions.map(n => `<option>${n}</option>`).join("")}
                 </select>
-                <select id="mode${i}">
-                    ${modes.map(m => `<option>${m}</option>`).join("")}
+                <select id="position${i}">
+                    ${positionModes.map(m => `<option>${m}</option>`).join("")}
                 </select>
             </div>
         `;
@@ -568,7 +580,7 @@
     }
 
     // ------------------------------------------------------------
-    //  LÓGICA DE VALIDAÇÃO (obey)
+    //  LÓGICA DE VALIDAÇÃO (obey) - CORRIGIDA
     // ------------------------------------------------------------
     function obey(path) {
         const rules = [];
@@ -576,26 +588,49 @@
             const act = document.getElementById("action" + i).value;
             if (act === "") continue;
             rules.push({
-                position: i,
                 action: act,
-                mode: document.getElementById("mode" + i).value
+                position: document.getElementById("position" + i).value
             });
         }
         if (rules.length === 0) return true;
 
         const lastThree = path.slice(-3);
         if (lastThree.length < 3) return false;
-        const reversed = [...lastThree].reverse();
+
+        // Mapeamento correto: 
+        // Last = índice 2 (último elemento)
+        // Second Last = índice 1 (penúltimo)
+        // Third Last = índice 0 (antepenúltimo)
+        const positionMap = {
+            "Last": 2,
+            "Second Last": 1,
+            "Third Last": 0
+        };
 
         for (const r of rules) {
-            const actionAtPosition = reversed[r.position];
             if (r.action === "Any Hit") {
-                if (!hitActions.includes(actionAtPosition)) return false;
+                // Verifica se pelo menos um hit existe nos últimos 3
+                const hasHit = lastThree.some(action => hitActions.includes(action));
+                if (!hasHit) return false;
+            } else if (hitActions.includes(r.action)) {
+                // Para hits específicos
+                if (r.position === "Any") {
+                    const hasAction = lastThree.some(action => action === r.action);
+                    if (!hasAction) return false;
+                } else {
+                    const index = positionMap[r.position];
+                    if (index === undefined) return false;
+                    if (lastThree[index] !== r.action) return false;
+                }
             } else {
-                if (actionAtPosition !== r.action) return false;
-                if (r.position === 0) {
-                    if (r.mode === "Last" && actionAtPosition !== r.action) return false;
-                    if (r.mode === "Not Last" && actionAtPosition === r.action) return false;
+                // Para ações não-hit
+                if (r.position === "Any") {
+                    const hasAction = lastThree.some(action => action === r.action);
+                    if (!hasAction) return false;
+                } else {
+                    const index = positionMap[r.position];
+                    if (index === undefined) return false;
+                    if (lastThree[index] !== r.action) return false;
                 }
             }
         }
@@ -686,6 +721,20 @@
         });
         html += `</div>`;
 
+        // Destaca os últimos 3 passos
+        if (sol.path.length >= 3) {
+            const lastThree = sol.path.slice(-3);
+            html += `<div style="margin-top: 10px; padding: 8px 12px; background: rgba(40, 60, 80, 0.2); border-radius: 6px; border-left: 3px solid rgba(80, 140, 180, 0.3);">
+                <span style="color: #6a8a8a; font-size: 0.8rem;">📌 Últimos 3 passos (da esquerda para direita): </span>
+                <span style="color: #b0c8d8; font-size: 0.9rem;">
+                    ${lastThree.map((p, i) => {
+                        const labels = ["Third Last", "Second Last", "Last"];
+                        return `<span style="margin: 0 4px; padding: 2px 8px; background: rgba(50, 70, 90, 0.3); border-radius: 4px;">${labels[i]}: ${p}</span>`;
+                    }).join(' → ')}
+                </span>
+            </div>`;
+        }
+
         output.innerHTML = html;
         window._lastSolution = sol;
     }
@@ -746,13 +795,13 @@
             if (craft.rules && Array.isArray(craft.rules)) {
                 for (let i = 0; i < 3; i++) {
                     const selAction = document.getElementById('action' + i);
-                    const selMode = document.getElementById('mode' + i);
+                    const selPosition = document.getElementById('position' + i);
                     if (i < craft.rules.length) {
                         selAction.value = craft.rules[i].action || '';
-                        selMode.value = craft.rules[i].mode || 'Any';
+                        selPosition.value = craft.rules[i].position || 'Any';
                     } else {
                         selAction.value = '';
-                        selMode.value = 'Any';
+                        selPosition.value = 'Any';
                     }
                 }
             }
@@ -789,7 +838,10 @@
         for (let i = 0; i < 3; i++) {
             const act = document.getElementById('action' + i).value;
             if (act === '') continue;
-            rules.push({ action: act, mode: document.getElementById('mode' + i).value });
+            rules.push({ 
+                action: act, 
+                position: document.getElementById('position' + i).value 
+            });
         }
 
         const crafts = loadCrafts();
